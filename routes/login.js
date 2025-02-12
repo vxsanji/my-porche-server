@@ -32,15 +32,17 @@ router.post('/',async function(req, res, next) {
             path:'/',
             httpOnly: true,
             expires: expires,
-            sameSite: true,
-            domain:'localhost',
+            sameSite: 'strict',
+            secure: true
+            // domain:'54.79.197.218',
         })
         res.cookie("rt", getCookie('rt'), {
             path:'/',
             httpOnly: true,
             expires: expires,
-            sameSite: true,
-            domain:'localhost',
+            sameSite: 'strict',
+            secure: true
+            // domain:'54.79.197.218',
         })
         let user = {
             email: result.email,
