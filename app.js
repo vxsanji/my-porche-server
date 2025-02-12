@@ -5,7 +5,6 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors = require('cors')
 var bodyParser = require('body-parser');
-var dotenv = require('dotenv').config();
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -16,7 +15,7 @@ var balanceRouter = require('./routes/balance');
 
 var app = express();
 app.use(cors({
-  origin: process.env.ORIGIN,
+  origin: 'http://54.79.197.218',
   credentials: true,
 }))
 app.use(bodyParser.json())
