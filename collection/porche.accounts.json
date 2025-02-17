@@ -1,0 +1,11 @@
+[{
+  "_id": {
+    "$oid": "67ad9cba82c9a8c6334b3bb0"
+  },
+  "name": "E8Market",
+  "email": "akagami.ef@gmail.com",
+  "baseUrl": "https://mtr.e8markets.com",
+  "brokerId": "2",
+  "password": "#SlQYbG3",
+  "__v": 0
+}]
