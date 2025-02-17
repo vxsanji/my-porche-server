@@ -1,9 +1,9 @@
 var express = require('express');
 const Account = require('../models/account');
 const OnlineAccount = require('../models/onlineAccount');
-const FilterAccount = require('../models/FilterAccount');
-const TradingAccount = require('../models/TradingAccount');
-const Blocked = require('../models/Blocked');
+const FilterAccount = require('../models/filterAccount');
+const TradingAccount = require('../models/tradingAccount');
+const Blocked = require('../models/blocked');
 var router = express.Router();
 
 router.get('/', async function(req, res, next) {

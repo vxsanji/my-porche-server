@@ -1,5 +1,5 @@
 var express = require('express');
-const TradingAccount = require('../models/TradingAccount');
+const TradingAccount = require('../models/tradingAccount');
 const OnlineAccount = require('../models/onlineAccount');
 var router = express.Router();
 

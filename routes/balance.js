@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const TradingAccount = require('../models/TradingAccount');
+const TradingAccount = require('../models/tradingAccount');
 const OnlineAccount = require('../models/onlineAccount');
 router.get('/', async function(req, res, next) {
     const account = await OnlineAccount.findOne({id: req.query.id});

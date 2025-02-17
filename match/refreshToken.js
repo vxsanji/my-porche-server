@@ -1,7 +1,4 @@
-const Account = require('../models/account');
-const crypto = require('crypto');
 const OnlineAccount = require('../models/onlineAccount');
-const FilterAccount = require('../models/FilterAccount');
 
 function getCookie(name, cookies) {
     const match = cookies.match(new RegExp('(^| )' + name + '=([^;]+)'));
