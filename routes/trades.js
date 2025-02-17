@@ -1,25 +1,23 @@
 var express = require('express');
+const TradingAccount = require('../models/TradingAccount');
+const OnlineAccount = require('../models/onlineAccount');
 var router = express.Router();
 
-router.post('/opened-position', async function(req, res, next) {
-    let { tradingApiToken, system_uuid} = req.body
-    let cookies = req.headers.cookie.split('; ').reduce((acc, c) => {
-        let [key, value] = c.split('=');
-        acc[key.trim()] = decodeURIComponent(value);
-        return acc;
-    }, {});
+router.get('/opened-position', async function(req, res, next) {
     var myHeaders = new Headers();
-    myHeaders.append("Auth-trading-api", tradingApiToken);
-    myHeaders.append("Cookie", "co-auth="+cookies['co-auth']);
-    
-
+    const account = await OnlineAccount.findOne({id: req.query.id})
+    const tradeAccount = await TradingAccount.findOne(req.query)
+    const system_uuid = tradeAccount.offer.system.uuid
+    myHeaders.append("Content-Type", "application/json"); 
+    myHeaders.append("Auth-trading-api", tradeAccount.tradingApiToken);
+    myHeaders.append("Cookie", "co-auth="+account.coAuth);
     var requestOptions = {
         method: 'GET',
         headers: myHeaders,
         redirect: 'follow'
     };
     try {
-        let response = await fetch(`https://mtr.e8markets.com/mtr-api/${system_uuid}/open-positions`, requestOptions)
+        let response = await fetch(`${account.baseUrl}/mtr-api/${system_uuid}/open-positions`, requestOptions)
         let result = await response.json();
         res.status(200).json(result.positions);
     } catch (error) {
@@ -27,28 +25,23 @@ router.post('/opened-position', async function(req, res, next) {
     }
 });
 
-router.post('/close-position', async function(req, res, next) {
-    let { tradingApiToken, system_uuid} = req.query
-    let position = req.body
-    let cookies = req.headers.cookie.split('; ').reduce((acc, c) => {
-        let [key, value] = c.split('=');
-        acc[key.trim()] = decodeURIComponent(value);
-        return acc;
-    }, {});
+router.post('/close', async function(req, res, next) {
     var myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Auth-trading-api", tradingApiToken);
-    myHeaders.append("Cookie", "co-auth="+cookies['co-auth']);
-
+    const account = await OnlineAccount.findOne({id: req.query.id})
+    const tradeAccount = await TradingAccount.findOne(req.query)
+    const system_uuid = tradeAccount.offer.system.uuid
+    myHeaders.append("Content-Type", "application/json"); 
+    myHeaders.append("Auth-trading-api", tradeAccount.tradingApiToken);
+    myHeaders.append("Cookie", "co-auth="+account.coAuth);
     
     var requestOptions = {
         method: 'POST',
         headers: myHeaders,
         redirect: 'follow',
-        body: JSON.stringify(position)
+        body: JSON.stringify(req.body)
     };
     try {
-        let response = await fetch(`https://mtr.e8markets.com/mtr-api/${system_uuid}/position/close`, requestOptions)
+        let response = await fetch(`${account.baseUrl}/mtr-api/${system_uuid}/position/close`, requestOptions)
         let result = await response.json();
         res.status(200).json(result);
     } catch (error) {
@@ -58,43 +51,23 @@ router.post('/close-position', async function(req, res, next) {
 
 
 router.post('/open',async function(req, res, next) {
-    const { 
-        instrument,
-        orderSide,
-        volume,
-        slPrice,
-        tpPrice, 
-    } = req.body;
-    
-    let { tradingApiToken, system_uuid} = req.query
-    let cookies = req.headers.cookie.split('; ').reduce((acc, c) => {
-        let [key, value] = c.split('=');
-        acc[key.trim()] = decodeURIComponent(value);
-        return acc;
-    }, {});
     var myHeaders = new Headers();
+    const account = await OnlineAccount.findOne({id: req.query.id})
+    const tradeAccount = await TradingAccount.findOne(req.query)
+    const system_uuid = tradeAccount.offer.system.uuid
     myHeaders.append("Content-Type", "application/json"); 
-    myHeaders.append("Auth-trading-api", tradingApiToken);
-    myHeaders.append("Cookie", "co-auth="+cookies['co-auth']);
-
-    var raw = JSON.stringify({
-        "instrument": instrument,
-        "orderSide": orderSide,
-        "volume": volume,
-        "slPrice": slPrice,
-        "tpPrice": tpPrice,
-        "isMobile": false
-    });
-
+    myHeaders.append("Auth-trading-api", tradeAccount.tradingApiToken);
+    myHeaders.append("Cookie", "co-auth="+account.coAuth);
+    req.body.volume = (req.body.volume * tradeAccount.volume).toFixed(2)
     var requestOptions = {
         method: 'POST',
         headers: myHeaders,
-        body: raw,
+        body: JSON.stringify(req.body),
         redirect: 'follow'
     };
 
     try {
-        let response = await fetch(`https://mtr.e8markets.com/mtr-api/${system_uuid}/position/open`, requestOptions)
+        let response = await fetch(`${account.baseUrl}/mtr-api/${system_uuid}/position/open`, requestOptions)
         let result = await response.json();
         res.status(200).json({ message: 'Login successful', user: result });
     } catch (error) {
@@ -103,46 +76,24 @@ router.post('/open',async function(req, res, next) {
     
 });
 
-router.post('/edit',async function(req, res, next) {
-    const { 
-        instrument,
-        id,
-        orderSide,
-        volume,
-        slPrice,
-        tpPrice,
-    } = req.body;
-    
-    let { tradingApiToken, system_uuid} = req.query
-    let cookies = req.headers.cookie.split('; ').reduce((acc, c) => {
-        let [key, value] = c.split('=');
-        acc[key.trim()] = decodeURIComponent(value);
-        return acc;
-    }, {});
+router.post('/edit',async function(req, res, next) {    
     var myHeaders = new Headers();
+    const account = await OnlineAccount.findOne({id: req.query.id})
+    const tradeAccount = await TradingAccount.findOne(req.query)
+    const system_uuid = tradeAccount.offer.system.uuid
     myHeaders.append("Content-Type", "application/json"); 
-    myHeaders.append("Auth-trading-api", tradingApiToken);
-    myHeaders.append("Cookie", "co-auth="+cookies['co-auth']);
-
-    var raw = JSON.stringify({
-        "instrument": instrument,
-        "id": id,
-        "orderSide": orderSide,
-        "volume": volume,
-        "slPrice": slPrice,
-        "tpPrice": tpPrice,
-        "isMobile": false
-    });
+    myHeaders.append("Auth-trading-api", tradeAccount.tradingApiToken);
+    myHeaders.append("Cookie", "co-auth="+account.coAuth);
 
     var requestOptions = {
         method: 'POST',
         headers: myHeaders,
-        body: raw,
+        body: JSON.stringify(req.body),
         redirect: 'follow'
     };
 
     try {
-        let response = await fetch(`https://mtr.e8markets.com/mtr-api/${system_uuid}/position/edit`, requestOptions)
+        let response = await fetch(`${account.baseUrl}/mtr-api/${system_uuid}/position/edit`, requestOptions)
         let result = await response.json();
         res.status(200).json({ message: 'Login successful', user: result });
     } catch (error) {

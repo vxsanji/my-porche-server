@@ -1,17 +1,14 @@
 var express = require('express');
 var router = express.Router();
-
+const TradingAccount = require('../models/TradingAccount');
+const OnlineAccount = require('../models/onlineAccount');
 router.get('/', async function(req, res, next) {
-    let { tradingApiToken, system_uuid} = req.query
-    let cookies = req.headers.cookie.split('; ').reduce((acc, c) => {
-        let [key, value] = c.split('=');
-        acc[key.trim()] = decodeURIComponent(value);
-        return acc;
-    }, {});
+    const account = await OnlineAccount.findOne({id: req.query.id});
+    const tradingAccount = await TradingAccount.findOne(req.query)
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Auth-trading-api", tradingApiToken);
-    myHeaders.append("Cookie", "co-auth="+cookies['co-auth']);
+    myHeaders.append("Auth-trading-api", tradingAccount.tradingApiToken);
+    myHeaders.append("Cookie", "co-auth="+account.coAuth);
 
     var requestOptions = {
         method: 'GET',
@@ -19,8 +16,16 @@ router.get('/', async function(req, res, next) {
         redirect: 'follow',
     };
     try {
-        let response = await fetch(`https://mtr.e8markets.com/mtr-api/${system_uuid}/balance`, requestOptions)
+        let response = await fetch(`${account.baseUrl}/mtr-api/${tradingAccount.offer.system.uuid}/balance`, requestOptions)
         let result = await response.json();
+        if(result.balance){
+            let vol = parseInt(result.balance) / 10000
+            if(vol < 0.9) vol = 0.5
+            else vol = Math.round(vol)
+            const volume = await TradingAccount.findOneAndUpdate(req.query, {volume: parseFloat(vol).toFixed(2)})
+            result.volume = parseFloat(vol).toFixed(2)
+            volume.save()
+        }
         res.status(200).json(result);
     } catch (error) {
         res.status(500).json({ message: 'Error logging in', error: error.message });

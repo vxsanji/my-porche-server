@@ -5,17 +5,28 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors = require('cors')
 var bodyParser = require('body-parser');
+const mongoose = require("mongoose");
+require('dotenv').config()
 
+var authRouter = require('./routes/auth');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var loginRouter = require('./routes/login');
 var tradesRouter = require('./routes/trades');
 var marketRouter = require('./routes/market');
 var balanceRouter = require('./routes/balance');
+var accountsRouter = require('./routes/accounts');
+const authenticateJWT = require('./middleware/auth');
 
 var app = express();
+
+const mongoURI = process.env.MONGO_URI;
+mongoose
+  .connect(mongoURI)
+  .then(() => console.log("🔥 Connected to MongoDB"))
+  .catch((err) => console.error("❌ MongoDB Connection Error:", err));
+
 app.use(cors({
-  origin: 'http://54.79.197.218',
+  origin: process.env.ORIGIN,
   credentials: true,
 }))
 app.use(bodyParser.json())
@@ -30,11 +41,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/api/user', usersRouter);
-app.use('/api/login', loginRouter);
-app.use('/api/trade', tradesRouter);
-app.use('/api/market', marketRouter);
-app.use('/api/balance', balanceRouter);
+app.use('/api/user', authenticateJWT, usersRouter);
+app.use('/api/trade', authenticateJWT, tradesRouter);
+app.use('/api/market', authenticateJWT, marketRouter);
+app.use('/api/balance', authenticateJWT, balanceRouter);
+app.use('/api/accounts', authenticateJWT, accountsRouter);
+app.use('/api/auth', authRouter)
 
 app.use(function(req, res, next) {
   next(createError(404));
