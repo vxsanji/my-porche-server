@@ -1,9 +1,9 @@
 const Account = require('../models/account');
 const crypto = require('crypto');
 const OnlineAccount = require('../models/onlineAccount');
-const TradingAccount = require('../models/TradingAccount');
-const FilterAccount = require('../models/FilterAccount');
-const Blocked = require('../models/Blocked');
+const TradingAccount = require('../models/tradingAccount');
+const FilterAccount = require('../models/filterAccount');
+const Blocked = require('../models/blocked');
 
 var myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
