@@ -106,11 +106,10 @@ router.get('/deactivated', async (req, res) => {
     }
 })
 
-router.post('/deactivate', async (req, res) => {
+router.get('/deactivate', async (req, res) => {
     try {
-        const filterAccount = new FilterAccount(req.body)
-        const tradingAccount = await TradingAccount.findOneAndUpdate(req.body, {isActive: false})
-        await filterAccount.save()
+        console.log(req.query)
+        const tradingAccount = await TradingAccount.findOneAndUpdate(req.query, {isActive: false})
         await tradingAccount.save()
         res.status(200).json({ message: 'Account deactivated successfully' });
     } catch (error) {
@@ -120,8 +119,7 @@ router.post('/deactivate', async (req, res) => {
 
 router.delete('/deactivate', async (req, res) => {
     try {
-        await FilterAccount.findOneAndDelete(req.query)
-        const tradingAccount = await TradingAccount.findOneAndUpdate(req.body, {isActive: true})
+        const tradingAccount = await TradingAccount.findOneAndUpdate(req.query, {isActive: true})
         await tradingAccount.save()
         res.status(200).json({ message: 'Account reactivated successfully' });
     } catch (error) {

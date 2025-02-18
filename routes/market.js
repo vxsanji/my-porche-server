@@ -1,25 +1,24 @@
 var express = require('express');
+const OnlineAccount = require('../models/onlineAccount');
+const TradingAccount = require('../models/tradingAccount');
 var router = express.Router();
 
 router.get('/', async function(req, res, next) {
-    let { tradingApiToken, system_uuid, symbol} = req.query
-    let cookies = req.headers.cookie.split('; ').reduce((acc, c) => {
-        let [key, value] = c.split('=');
-        acc[key.trim()] = decodeURIComponent(value);
-        return acc;
-    }, {});
+    const symbol = req.query.symbol;
     var myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Auth-trading-api", tradingApiToken);
-    myHeaders.append("Cookie", "co-auth="+cookies['co-auth']);
-
+    const account = await OnlineAccount.find()
+    const tradeAccount = await TradingAccount.find()
+    const system_uuid = tradeAccount[0].offer.system.uuid
+    myHeaders.append("Content-Type", "application/json"); 
+    myHeaders.append("Auth-trading-api", tradeAccount[0].tradingApiToken);
+    myHeaders.append("Cookie", "co-auth="+account[0].coAuth);
     var requestOptions = {
         method: 'GET',
         headers: myHeaders,
-        redirect: 'follow',
+        redirect: 'follow'
     };
     try {
-        let response = await fetch(`https://mtr.e8markets.com/mtr-api/${system_uuid}/quotations?symbols=${symbol}`, requestOptions)
+        let response = await fetch(`${account[0].baseUrl}/mtr-api/${system_uuid}/quotations?symbols=${symbol}`, requestOptions)
         let result = await response.json();
         res.status(200).json(result);
     } catch (error) {
