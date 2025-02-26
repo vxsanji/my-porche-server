@@ -52,12 +52,23 @@ router.post('/login', async (req, res) => {
 
 router.get('/refresh-token', authenticateJWT, async (req, res) => {
     const token = generateAccessToken({ username: req.user.username });
-    refreshToken()
     res.status(200).json({
         token: token,
         username: req.user.username,
         message: 'Login successful.'
     });
 })
+
+router.get('/refresh-match', authenticateJWT, async (req, res) => {
+    try {
+        refreshToken()
+        res.status(200).json({
+            message: 'Match refreshed successfully'
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error logging in', error: error.message });
+    }
+})
+
 
 module.exports = router;

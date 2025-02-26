@@ -15,6 +15,7 @@ var tradesRouter = require('./routes/trades');
 var marketRouter = require('./routes/market');
 var balanceRouter = require('./routes/balance');
 var accountsRouter = require('./routes/accounts');
+var marketPriceRouter = require('./routes/marketPrice')
 const authenticateJWT = require('./middleware/auth');
 
 var app = express();
@@ -46,6 +47,7 @@ app.use('/api/trade', authenticateJWT, tradesRouter);
 app.use('/api/market', authenticateJWT, marketRouter);
 app.use('/api/balance', authenticateJWT, balanceRouter);
 app.use('/api/accounts', authenticateJWT, accountsRouter);
+app.use('/api/historical', authenticateJWT, marketPriceRouter);
 app.use('/api/auth', authRouter)
 
 app.use(function(req, res, next) {
